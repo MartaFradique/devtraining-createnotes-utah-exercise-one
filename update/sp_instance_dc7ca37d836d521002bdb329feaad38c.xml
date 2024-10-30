@@ -10,23 +10,23 @@
         <roles/>
         <short_description/>
         <size>md</size>
-        <sp_column display_value="1">106f9b3d832d521002bdb329feaad39c</sp_column>
-        <sp_widget display_value="widget 2">660ab93d8325521002bdb329feaad398</sp_widget>
+        <sp_column display_value="1">996ce37d836d521002bdb329feaad3dd</sp_column>
+        <sp_widget display_value="Widget 3 Filter By subject">649b6739836d521002bdb329feaad397</sp_widget>
         <sys_class_name>sp_instance</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2024-10-30 09:40:49</sys_created_on>
-        <sys_id>1f3bf93d8325521002bdb329feaad39c</sys_id>
-        <sys_mod_count>3</sys_mod_count>
+        <sys_created_on>2024-10-30 17:55:24</sys_created_on>
+        <sys_id>dc7ca37d836d521002bdb329feaad38c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
         <sys_name/>
         <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
-        <sys_update_name>sp_instance_1f3bf93d8325521002bdb329feaad39c</sys_update_name>
+        <sys_update_name>sp_instance_dc7ca37d836d521002bdb329feaad38c</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2024-10-30 16:58:24</sys_updated_on>
+        <sys_updated_on>2024-10-30 17:55:24</sys_updated_on>
         <title/>
         <url/>
         <widget_parameters/>
     </sp_instance>
-    <sys_translated_text action="delete_multiple" query="documentkey=1f3bf93d8325521002bdb329feaad39c"/>
+    <sys_translated_text action="delete_multiple" query="documentkey=dc7ca37d836d521002bdb329feaad38c"/>
 </record_update>

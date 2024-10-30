@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="2efa0fb183e9521002bdb329feaad319" label="Subjects" max_length="40" name="x_snc_createnotes_subjects" type="collection">
+        <element choice="1" label="Name" max_length="40" name="name" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Biology"/>
+                <element inactive_on_update="false" label="-- New choice --" value="-- New choice --"/>
+                <element inactive_on_update="false" label="Math" value="3"/>
+                <element inactive_on_update="false" label="English" value="1"/>
+                <element inactive_on_update="false" label="Portuguese" value="2"/>
+                <element inactive_on_update="false" label="Physics" value="4"/>
+            </choice>
+        </element>
+    </element>
+</database>

@@ -2,38 +2,120 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
         <client_script><![CDATA[function($scope, $rootScope) {
-  /* widget controller */
   var c = this;
 
-  $rootScope.$on('selectNote', function(event, data) {
+  $rootScope.$on('selectProfessor', function(event, data) {
     c.server.get({
-      action: 'getNote',
-      noteID: $rootScope.noteID
+      action: 'getProfessor',
+      professorID: $rootScope.professorID
     }).then(function(r) {
-      c.data.title = r.data.note.title;
-      c.data.note = r.data.note.note;
-      c.data.noteID = r.data.note.sys_id;
+      if (r.data) {
+        c.data.name = r.data.professor.name;
+        c.data.office = r.data.professor.office;
+        c.data.subject = r.data.professor.subject;
+        c.data.professorID = r.data.professor.sys_id;
+        c.data.subjectOptions = r.data.subjectOptions || []; // Ensure it is defined
+      }
     });
   });
+	
+	// Close widget function
+  c.closeWidget = function() {
+    c.data.professorID = null; // Reset professorID to hide the widget
+  };
 
-  // Update note on "Send" button click
-  c.updateNote = function() {
+  // Update professor on "Send" button click
+  c.updateProfessor = function() {
     c.server.get({
-      action: 'updateNote',
-      noteID: c.data.noteID,
-      noteBody: c.data.note,
-      noteTitle: c.data.title
+      action: 'updateProfessor',
+      professorID: c.data.professorID,
+      professorName: c.data.name,
+      officeNumber: c.data.office,
+      subject: c.data.subject
     }).then(function(r) {
-      console.log('Note updated successfully');
-      // Emit an event to notify the first widget about the update
-      $rootScope.$emit('noteUpdated');
-			 c.data.noteID = null;
+      console.log('Professor info updated successfully');
+      $rootScope.$emit('professorUpdated');
+      c.data.professorID = null;
     });
   }
 }
+
 ]]></client_script>
         <controller_as>c</controller_as>
-        <css/>
+        <css>.panel {
+  border-radius: 8px; /* Adjust the pixel value as needed */
+  overflow: hidden;   /* Ensures content stays within rounded borders */
+}
+
+/* Optional: Adjust header and body elements to match rounded borders */
+.panel-heading {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.panel-body,
+.panel-footer {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Form group styling for input spacing */
+.edit-widget .form-group {
+  margin-bottom: 12px;
+}
+
+/* Form control styling */
+.edit-widget .form-control {
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  font-size: 1em;
+  transition: border-color 0.2s ease;
+}
+
+.edit-widget .form-control:focus {
+  border-color: #FF9A0A;
+  outline: none;
+  box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+}
+
+/* Send button styling */
+.edit-widget .btn-send {
+  padding: 8px 20px;
+  font-size: 1em;
+  font-weight: 500;
+  background-color: #06402b;
+  color: #fff;
+  border-radius: 5px;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.edit-widget .btn-send:hover {
+  background-color: #0056b3;
+}
+
+/* Text-right alignment with spacing */
+.edit-widget .text-right {
+  margin-top: 10px;
+}
+
+
+
+.subject-dropdown {
+  width: 100%;
+  padding: 8px; /* Add padding for better readability */
+  font-size: 16px; /* Increase font size */
+  height: auto; /* Allow height to adjust as needed */
+}
+
+
+.subject-dropdown option {
+  white-space: normal; /* Allow text to wrap within options */
+}
+
+
+</css>
         <data_table>sp_instance</data_table>
         <demo_data/>
         <description/>
@@ -48,49 +130,79 @@
         <public>false</public>
         <roles/>
         <script><![CDATA[(function() {
-	/* populate the 'data' object */
+  data.subjectOptions = []; // Array to hold subject options
 
-	if (input && input.noteID) {
-		var note = new GlideRecord('x_snc_createnotes_note');
-		if (note.get(input.noteID)) {
-			if (input.action == 'getNote') {
-				data.note = {};
-				$sp.getRecordValues(data.note, note, "title, note, sys_id");
-			}else if (input.action == 'updateNote') { 
-				note.title = input.noteTitle; 
-				note.note = input.noteBody; 
-				note.update(); 
-			}
-		}
-	}
-})();]]></script>
+  if (input && input.professorID) {
+    var professor = new GlideRecord('x_snc_createnotes_professors');
+    if (professor.get(input.professorID)) {
+      if (input.action == 'getProfessor') {
+        data.professor = {};
+        data.professor.name = professor.getDisplayValue('name');
+        data.professor.office = professor.getDisplayValue('office');
+        data.professor.subject = professor.getValue('subject'); // Store reference sys_id for subject
+        data.professor.sys_id = professor.getUniqueValue();
+      } else if (input.action == 'updateProfessor') {
+        professor.name = input.professorName;
+        professor.office = input.officeNumber;
+        professor.subject = input.subject; // Set the selected subject reference
+        professor.update();
+      }
+    }
+  }
+
+  // Safely retrieve subject options from the 'subjects' table
+  try {
+    var subjectGR = new GlideRecord('x_snc_createnotes_subjects'); // Ensure table name is correct
+    subjectGR.query();
+    while (subjectGR.next()) {
+      data.subjectOptions.push({
+        sys_id: subjectGR.getUniqueValue(),
+        display_value: subjectGR.getDisplayValue('name') // Assuming 'name' is the field for subject title
+      });
+    }
+  } catch (e) {
+    gs.error("Error retrieving subjects: " + e.message);
+  }
+})();
+]]></script>
         <servicenow>false</servicenow>
         <sys_class_name>sp_widget</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2024-10-30 09:35:35</sys_created_on>
         <sys_id>660ab93d8325521002bdb329feaad398</sys_id>
-        <sys_mod_count>18</sys_mod_count>
+        <sys_mod_count>43</sys_mod_count>
         <sys_name>widget 2</sys_name>
         <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
         <sys_update_name>sp_widget_660ab93d8325521002bdb329feaad398</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2024-10-30 12:04:42</sys_updated_on>
-        <template><![CDATA[<div class="panel panel-default" ng-show="c.data.noteID">
+        <sys_updated_on>2024-10-30 18:28:35</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-default edit-widget" ng-show="c.data.professorID">
   <div class="panel-heading clearfix">
-    <div class="row">
-      <div class="col-md-12">
-        <input class="form-control" id="note-title" ng-model="c.data.title" placeholder="Title"/>
-      </div>
-    </div>
+    <h3 class="panel-title pull-left">Edit Professor Info</h3>
+    <button class="close pull-right" ng-click="c.closeWidget()" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
   <div class="panel-body">
-    <textarea class="form-control" id="note-body" ng-model="c.data.note" placeholder="Enter your note here"></textarea>
-  </div>
-  <div class="panel-footer text-right">
-    <!-- Send button that calls updateNote function when clicked -->
-    <button class="btn btn-primary" ng-click="c.updateNote()">Send</button>
+    <div class="form-group">
+      <label for="professor-name">Professor Name</label>
+      <input class="form-control" id="professor-name" ng-model="c.data.name" placeholder="Enter professor name" />
+    </div>
+    <div class="form-group">
+      <label for="office-number">Office Number</label>
+      <input class="form-control" id="office-number" ng-model="c.data.office" placeholder="Enter office number" />
+    </div>
+    <div class="form-group">
+      <label for="subject">Subject</label>
+      <select class="form-control subject-dropdown" id="subject" ng-model="c.data.subject" ng-options="option.sys_id as option.display_value for option in c.data.subjectOptions">
+        <option value="">Select a subject</option>
+      </select>
+    </div>
+    <div class="text-right">
+      <button class="btn btn-primary btn-send" ng-click="c.updateProfessor()">Send</button>
+    </div>
   </div>
 </div>
 ]]></template>

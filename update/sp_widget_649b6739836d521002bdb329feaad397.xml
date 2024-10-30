@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope, $rootScope) {
+  var c = this;
+
+  // Fetch distinct subjects from the professors table
+  c.server.get({
+    action: 'getSubjects'
+  }).then(function(response) {
+    c.data.subjects = response.data.subjects; // Populate unique subjects
+  });
+
+  // Function to handle subject selection
+  c.selectSubject = function(subject) {
+    $rootScope.$emit('subjectSelected', subject); // Emit selected subject
+  };
+}
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.subject-filter-widget .btn {
+  margin: 5px;
+  padding: 8px 16px;
+  font-size: 1em;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>widget_3_filter_by_subject</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Widget 3 Filter By subject</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  if (input && input.action === 'getSubjects') {
+    data.subjects = [];
+    var subjectsObj = {}; // Object to store unique subjects as keys
+
+    // Query the professors table to collect subjects
+    var profGR = new GlideRecord('x_snc_createnotes_professors');
+    profGR.query();
+    
+    while (profGR.next()) {
+      var subject = profGR.getValue('subject'); // Querying for the subject value
+      var subjectDisplay = profGR.subject.getDisplayValue(); // Get the display value for the subject
+      // If subject not already added, add it to the subjectsObj and data.subjects
+      if (!subjectsObj[subject]) {
+        subjectsObj[subject] = true;
+        data.subjects.push({ value: subject, display: subjectDisplay }); // Add unique subject to the list
+      }
+    }
+  }
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-10-30 17:51:36</sys_created_on>
+        <sys_id>649b6739836d521002bdb329feaad397</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>Widget 3 Filter By subject</sys_name>
+        <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
+        <sys_update_name>sp_widget_649b6739836d521002bdb329feaad397</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-10-30 18:36:16</sys_updated_on>
+        <template><![CDATA[<div class="subject-filter-widget">
+  <button class="btn btn-default" ng-click="c.selectSubject('')">All Subjects</button>
+  <button class="btn btn-primary" ng-repeat="subject in data.subjects" 
+          ng-click="c.selectSubject(subject.display)">
+    {{subject.display}}
+  </button>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

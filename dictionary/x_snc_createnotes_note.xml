@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<database>
-    <element label="Note" max_length="40" name="x_snc_createnotes_note" type="collection">
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="3039f5f98325521002bdb329feaad386" label="Note" max_length="40" name="x_snc_createnotes_note" type="collection">
         <element default="Enter notes here" label="Note" max_length="4000" name="note" type="string"/>
-        <element default="javascript:getNextObjNumberPadded();" display="true" dynamic_default_value="fdcb83a85f220100a9ad2572f2b4773c" label="Number" max_length="40" name="number" type="string" use_dynamic_default="true"/>
+        <element attributes="edge_encryption_enabled=true" label="Name" max_length="40" name="name" type="string"/>
         <element default="New Note" label="Title" max_length="100" name="title" type="string"/>
         <element label="User" max_length="32" name="user" reference="sys_user" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" label="Office" max_length="40" name="office" type="string"/>
+        <element default="javascript:getNextObjNumberPadded();" display="true" dynamic_default_value="fdcb83a85f220100a9ad2572f2b4773c" label="Number" max_length="40" name="number" type="string" use_dynamic_default="true"/>
         <index name="index">
             <element name="user"/>
         </index>

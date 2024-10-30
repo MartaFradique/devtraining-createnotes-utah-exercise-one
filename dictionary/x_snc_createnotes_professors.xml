@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="64aa83b183e9521002bdb329feaad352" label="Professors" max_length="40" name="x_snc_createnotes_professors" type="collection">
+        <element choice="3" label="Subject" max_length="32" name="subject" reference="x_snc_createnotes_subjects" type="reference">
+            <choice/>
+        </element>
+        <element label="Name" max_length="100" name="name" type="string"/>
+        <element label="Office" max_length="10" name="office" type="integer"/>
+        <index name="index">
+            <element name="subject"/>
+        </index>
+    </element>
+</database>

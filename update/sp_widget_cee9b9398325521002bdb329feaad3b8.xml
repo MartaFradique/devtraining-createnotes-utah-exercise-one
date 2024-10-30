@@ -2,39 +2,50 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
         <client_script><![CDATA[function($rootScope, $scope) {
-  /* widget controller */
   var c = this;
 
-  // Function to refresh notes
-  c.refreshNotes = function() {
+  c.refreshProfessors = function() {
     c.server.update().then(function(response) {
-      c.data.notes = response.data.notes;
+      c.data.professors = response.data.professors;
     });
   };
 
-  // Select item function
+  // Function to handle selection of a professor
   c.selectItem = function(idx) {
-    var id = c.data.notes[idx].sys_id;
-    console.log('Note ID: ' + id);
-    $rootScope.noteID = id;
-    $rootScope.$emit('selectNote', id);
+    var id = c.data.professors[idx].sys_id;
+    $rootScope.professorID = id; // Set the global professorID
+    c.data.professorID = id; // Set local ID for visibility control
+    $rootScope.$emit('selectProfessor', id);
   };
 
-  // Listen for the update event from the second widget
-  $rootScope.$on('noteUpdated', function() {
-    // Refresh notes in the first widget
-    c.refreshNotes();
+  // Listen for subject selection from Widget 3
+  $rootScope.$on('subjectSelected', function(event, subject) {
+    c.data.selectedSubject = subject; // Set the selected subject filter
   });
-}
-]]></client_script>
+}]]></client_script>
         <controller_as>c</controller_as>
         <css>.edit-icon {
   float: right;
   cursor: pointer;
-  color: #007bff;
+  color: #FF9A0A;
   margin-top: -30px; /* Adjust based on your design */
 }
-</css>
+.panel {
+  border-radius: 8px; /* Adjust the pixel value as needed */
+  overflow: hidden;   /* Ensures content stays within rounded borders */
+}
+
+/* Optional: Adjust header and body elements to match rounded borders */
+.panel-heading {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.panel-body,
+.panel-footer {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}</css>
         <data_table>sp_instance</data_table>
         <demo_data/>
         <description/>
@@ -45,36 +56,41 @@
         <internal>false</internal>
         <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
         <name>widget 1</name>
-        <option_schema>[{"hint":"Specify a title for the Notes List widget","name":"title","section":"other","default_value":"Notes","label":"Title","type":"string"},{"name":"maximum_records_to_display","section":"other","default_value":"5","label":"Maximum records to display","type":"choice","choices":[{"label":"Select the maximum number of records to display","value":"Select the maximum number of records to display"}]}]</option_schema>
+        <option_schema>[{"hint":"Specify a title for the Notes List widget","name":"title","section":"other","default_value":"Notes","label":"Title","type":"string"},{"name":"maximum_records_to_display","section":"other","default_value":"5","label":"Maximum records to display","type":"choice","choices":[{"label":"Select the maximum number of records to display","value":"Select the maximum number of records to display", "label":"5","value":5}]}]</option_schema>
         <public>false</public>
         <roles/>
         <script><![CDATA[(function() {
-  data.notes = [];
-  var noteGR = new GlideRecord('x_snc_createnotes_note');
-  noteGR.orderByDesc('sys_created_on');
-  noteGR.setLimit(options.maximum_records_to_display);
-  noteGR.query();
-  while (noteGR.next()) {
-    var noteObj = {};
-    $sp.getRecordDisplayValues(noteObj, noteGR, 'number,title,sys_id');
-    noteObj.note = noteGR.getValue('note').slice(0, 20);
-    data.notes.push(noteObj);
+  data.professors = [];
+  var profGR = new GlideRecord('x_snc_createnotes_professors');
+
+  // Optionally check if input.subject is defined and not null
+  if (input && input.subject) {
+    profGR.addQuery('subject', input.subject);
   }
-})();
-]]></script>
+
+  profGR.orderByDesc('sys_created_on');
+  profGR.setLimit(options.maximum_records_to_display);
+  profGR.query();
+  
+  while (profGR.next()) {
+    var professorObj = {};
+    $sp.getRecordDisplayValues(professorObj, profGR, 'name, office, subject, sys_id');
+    data.professors.push(professorObj);
+  }
+})();]]></script>
         <servicenow>false</servicenow>
         <sys_class_name>sp_widget</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2024-10-30 09:35:00</sys_created_on>
         <sys_id>cee9b9398325521002bdb329feaad3b8</sys_id>
-        <sys_mod_count>15</sys_mod_count>
+        <sys_mod_count>38</sys_mod_count>
         <sys_name>widget 1</sys_name>
         <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
         <sys_update_name>sp_widget_cee9b9398325521002bdb329feaad3b8</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2024-10-30 12:00:58</sys_updated_on>
+        <sys_updated_on>2024-10-30 18:24:32</sys_updated_on>
         <template><![CDATA[<div class="panel panel-default">
   <div class="panel-heading clearfix">
     <h3 class="panel-title pull-left">
@@ -82,14 +98,21 @@
     </h3>
   </div>
   <div class="list-group">
-    <a class="list-group-item" ng-repeat="note in data.notes">
+    <a class="list-group-item" ng-repeat="professor in data.professors" 
+       ng-show="!data.selectedSubject || professor.subject === data.selectedSubject">
       <h4 class="list-group-item-heading">
-        {{note.title}}
+        {{professor.name}}
       </h4>
-      <p class="list-group-item-text">
-        {{note.note}}
-      </p>
-      <!-- Pencil icon to edit, only this icon will trigger the selectItem function -->
+      <div class="professor-details">
+        <div class="detail-item">
+          <label>Office</label>
+          <span>{{professor.office}}</span>
+        </div>
+        <div class="detail-item">
+          <label>Subject</label>
+          <span>{{professor.subject}}</span>
+        </div>
+      </div>
       <span class="edit-icon" ng-click="c.selectItem($index)">
         <i class="fa fa-pencil" aria-hidden="true"></i>
       </span>
@@ -98,4 +121,15 @@
 </div>
 ]]></template>
     </sp_widget>
+    <sys_es_latest_script action="INSERT_OR_UPDATE">
+        <id>cee9b9398325521002bdb329feaad3b8</id>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-10-30 14:05:31</sys_created_on>
+        <sys_id>e4d772798369521002bdb329feaad343</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-10-30 14:05:31</sys_updated_on>
+        <table>sp_widget</table>
+        <use_es_latest>false</use_es_latest>
+    </sys_es_latest_script>
 </record_update>
